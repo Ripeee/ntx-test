@@ -25,9 +25,9 @@
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, computed, watch } from 'vue';
-import { useProductStore } from '@/stores/productStore';
+import { useProductStore } from '@/stores/products';
 
 const props = defineProps({
   categoryData: { // Data kategori jika mode edit

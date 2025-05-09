@@ -1,0 +1,51 @@
+type Product {
+  id: ID!
+  name: String!
+  price: Float!
+  description: String
+  category: Category
+}
+
+type Category {
+  id: ID!
+  name: String!
+  products: [Product]
+}
+
+input ProductInput {
+  name: String!
+  price: Float!
+  description: String
+  categoryId: ID!
+}
+
+type Query {
+  products: [Product]
+  product(id: ID!): Product
+  categories: [Category]
+}
+
+type Mutation {
+  addProduct(input: ProductInput!): Product
+  updateProduct(id: ID!, input: ProductInput!): Product
+  deleteProduct(id: ID!): Boolean
+}
+
+extend type Query {
+  products(page: Int! = 1, perPage: Int! = 10): ProductPagination
+}
+type ProductPagination {
+  data: [Product!]!
+  pagination: PaginationInfo!
+}
+
+type PaginationInfo {
+  total: Int!
+  perPage: Int!
+  currentPage: Int!
+  totalPages: Int!
+}
+
+type Query {
+  products(page: Int!, perPage: Int!): ProductPagination
+}

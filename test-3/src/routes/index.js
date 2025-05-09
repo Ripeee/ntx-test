@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DashboardView from "@/views/DashboardView.vue";
-import CategoryManagementView from "@/views/CategoryManagementView.vue";
+import Dashboard from "@/views/DashboardView.vue";
+import CategoryManager from "@/components/CategoryManager.vue";
+import ProductManager from "@/components/ProductManager.vue";
 
 const router = createRouter({
-	history: createWebHistory(import.meta.env.BASE_URL),
+	history: createWebHistory(),
 	routes: [
 		{
 			path: "/",
@@ -12,22 +13,17 @@ const router = createRouter({
 		{
 			path: "/dashboard",
 			name: "dashboard",
-			component: DashboardView,
+			component: Dashboard,
 		},
 		{
 			path: "/categories",
-			name: "category-management",
-			component: CategoryManagementView,
-			// Optional: Baca query param untuk selectedCategoryId jika ingin deep linking
-			// beforeEnter: (to, from, next) => {
-			//    const store = useProductStore(); // Import store jika perlu
-			//    if (to.query.cat) {
-			//       store.selectCategory(to.query.cat);
-			//    } else {
-			//       store.selectCategory(null);
-			//    }
-			//    next();
-			// }
+			name: "categories",
+			component: CategoryManager,
+		},
+		{
+			path: "/products",
+			name: "products",
+			component: ProductManager,
 		},
 		// Tambahkan route lain jika ada
 	],

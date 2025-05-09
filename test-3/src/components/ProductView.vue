@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { useProductStore } from '@/stores/productStore';
+import { useProductStore } from '@/stores/products';
 import { computed } from 'vue';
 
 // Mendefinisikan props

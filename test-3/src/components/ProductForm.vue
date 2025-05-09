@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useProductStore } from '@/stores/productStore';
+import { useProductStore } from '@/stores/products';
 
 const props = defineProps({
   productData: { // Data produk jika mode edit

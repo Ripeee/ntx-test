@@ -15,6 +15,21 @@ a,
   padding: 3px;
 }
 
+ .btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background: #4CAF50;
+    color: white;
+  }
+  .btn-primary:hover {
+    background: #45a049;
+  }
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);

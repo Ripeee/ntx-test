@@ -1,17 +1,19 @@
-import { createApp, provide } from "vue";
-import App from "./App.vue";
+import { createApp } from "vue";
 import { createPinia } from "pinia";
-import router from "./routes/index"; // Impor router
-import { apolloClient } from "./api/graphql"; // Impor apolloClient
-import { DefaultApolloClient } from "@vue/apollo-composable"; // Untuk provide apollo client
+import { createApolloProvider } from "@vue/apollo-option";
+import router from "@/routes/index";
+import App from "./App.vue";
+import { apolloClient } from "@/apollo";
+import cors from "cors";
 
+
+// Create Vue App
 const app = createApp(App);
-const pinia = createPinia();
-
-app.use(pinia);
-app.use(router); // Gunakan router
-
-// Provide apollo client
-app.provide(DefaultApolloClient, apolloClient);
-
+app.use(createPinia());
+app.use(
+	createApolloProvider({
+		defaultClient: apolloClient,
+	}),
+);    
+app.use(router);    
 app.mount("#app");

@@ -1,121 +1,103 @@
-import {
-	ApolloClient,
-	createHttpLink,
-	InMemoryCache,
-	gql,
-} from "@apollo/client/core";
-import { onError } from "@apollo/client/link/error";
+import gql from "graphql-tag";
 
-// Konfigurasi HTTP Link (Ganti URL_GRAPHQL_ANDA dengan endpoint Anda)
-const httpLink = createHttpLink({
-	uri: "http://localhost:5174/graphql", // Ganti dengan URL GraphQL Anda
-	// Tambahkan header jika diperlukan (misal: otentikasi)
-	// headers: {
-	//   'Authorization': `Bearer ${localStorage.getItem('token')}`,
-	//   'Content-Type': 'application/json',
-	// },
-});
-
-// Error Handling Link
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-	if (graphQLErrors)
-		graphQLErrors.forEach(({ message, locations, path }) =>
-			console.error(
-				`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-			),
-		);
-	if (networkError) console.error(`[Network error]: ${networkError}`);
-});
-
-// Cache
-const cache = new InMemoryCache();
-
-// Buat Apollo Client
-export const apolloClient = new ApolloClient({
-	link: errorLink.concat(httpLink),
-	cache,
-});
-
-// --- Definisi Operasi GraphQL ---
-
-// Query untuk mengambil semua kategori dan produk (list datar)
-export const GET_ALL_DATA = gql`
-	query GetAllCategoriesAndProducts {
+// Category queries and mutations
+export const getCategoriesQuery = gql`
+	query GetCategories {
 		categories {
 			id
 			name
-			parentId # Asumsi ada field parentId
+			parentId
 		}
+	}
+`;
+
+export const addCategoryMutation = gql`
+	mutation AddCategory($input: CategoryInput!) {
+		addCategory(input: $input) {
+			id
+			name
+			parentId
+		}
+	}
+`;
+
+export const updateCategoryMutation = gql`
+	mutation UpdateCategory($id: ID!, $input: CategoryInput!) {
+		updateCategory(id: $id, input: $input) {
+			id
+			name
+			parentId
+		}
+	}
+`;
+
+export const deleteCategoryMutation = gql`
+	mutation DeleteCategory($id: ID!) {
+		deleteCategory(id: $id) {
+			id
+		}
+	}
+`;
+
+
+// Product queries and mutations
+export const getProductsQuery = gql`
+	query GetProducts {
 		products {
 			id
 			name
 			price
-			categoryId # Asumsi ada field categoryId
+			description
+			categoryId
+			stock
+			image
 		}
 	}
 `;
 
-// Mutasi Kategori
-export const CREATE_CATEGORY_MUTATION = gql`
-	mutation CreateCategory($name: String!, $parentId: ID) {
-		createCategory(input: { name: $name, parentId: $parentId }) {
-			id
-			name
-			parentId
-		}
-	}
-`;
-
-export const UPDATE_CATEGORY_MUTATION = gql`
-	mutation UpdateCategory($id: ID!, $name: String!, $parentId: ID) {
-		updateCategory(id: $id, input: { name: $name, parentId: $parentId }) {
-			id
-			name
-			parentId
-		}
-	}
-`;
-
-export const DELETE_CATEGORY_MUTATION = gql`
-	mutation DeleteCategory($id: ID!) {
-		deleteCategory(id: $id) # Asumsi mutasi ini menghapus rekursif jika perlu
-	}
-`;
-
-// Mutasi Produk
-export const CREATE_PRODUCT_MUTATION = gql`
-	mutation CreateProduct($name: String!, $price: Float!, $categoryId: ID!) {
-		createProduct(
-			input: { name: $name, price: $price, categoryId: $categoryId }
-		) {
+export const getProductByIdQuery = gql`
+	query GetProductById($id: ID!) {
+		product(id: $id) {
 			id
 			name
 			price
+			description
 			categoryId
+			stock
+			image
 		}
 	}
 `;
 
-export const UPDATE_PRODUCT_MUTATION = gql`
-	mutation UpdateProduct(
-		$id: ID!
-		$name: String!
-		$price: Float!
-		$categoryId: ID!
-	) {
-		updateProduct(
-			id: $id
-			input: { name: $name, price: $price, categoryId: $categoryId }
-		) {
+export const addProductMutation = gql`
+	mutation AddProduct($input: ProductInput!) {
+		addProduct(input: $input) {
 			id
 			name
 			price
+			description
 			categoryId
+			stock
+			image
 		}
 	}
 `;
 
-export const DELETE_PRODUCT_MUTATION = gql`
+export const updateProductMutation = gql`
+	mutation UpdateProduct($id: ID!, $input: ProductInput!) {
+		updateProduct(id: $id, input: $input) {
+			id
+			name
+			price
+			description
+			categoryId
+			stock
+			image
+		}
+	}
+`;
+
+export const deleteProductMutation = gql`
 	mutation DeleteProduct($id: ID!) {
 		deleteProduct(id: $id)
 	}
