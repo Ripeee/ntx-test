@@ -14,7 +14,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useMapStore } from '@/stores/mapStore'; // Sesuaikan path
+import { useLocationStore } from '@/stores/locationStore'; // Sesuaikan path
 
 const props = defineProps({
   markerId: {
@@ -31,7 +31,7 @@ const props = defineProps({
   }
 });
 
-const mapStore = useMapStore();
+const mapStore = useLocationStore();
 
 // Gunakan data dari prop untuk konten popup
 const popupTitle = computed(() => props.markerData.title || 'Detail Marker');

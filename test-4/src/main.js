@@ -11,7 +11,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-
+// import { createRouter, createWebHistory } from 'vue-router';
 // const app = createApp(App)
 
 // app.use(createPinia())
