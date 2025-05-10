@@ -2,35 +2,19 @@ import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import { buildSchema } from "graphql";
 import cors from "cors";
-// const express = require("express");
-// const { graphqlHTTP } = require("express-graphql");
-// const { buildSchema } = require("graphql");
-
 const schema = buildSchema(`
   type Category {
     id: ID!
     name: String!
     parentId: ID
   }
-
-  input CategoryInput {
+		
+	input CategoryInput {
     name: String!
     parentId: ID
   }
 
-  type Query {
-    categories: [Category]
-		products: [Product]!
-    product(id: ID!): Product
-  }
-
-  type Mutation {
-    addCategory(input: CategoryInput!): Category
-    updateCategory(id: ID!, input: CategoryInput!): Category
-    deleteCategory(id: ID!): Category
-  }
-
-	type Product {
+  type Product {
     id: ID!
     name: String!
     price: Float!
@@ -39,8 +23,49 @@ const schema = buildSchema(`
     stock: Int
     image: String
   }
+
+	input ProductInput {
+		name: String!
+		price: Float!
+		description: String
+		categoryId: ID!
+		stock: Int
+		image: String
+	}
 		
+  type ProductsResponse {
+    products: [Product]!
+    pagination: Pagination!
+  }
+	
+	type Pagination {
+    totalItems: Int!
+    totalPages: Int!
+    currentPage: Int!
+    perPage: Int!
+  }
+
+  input PaginationInput {
+    page: Int
+    perPage: Int
+  }
+
+  type Query {
+    categories: [Category]
+    products(pagination: PaginationInput): ProductsResponse
+    product(id: ID!): Product
+  }
+
+  type Mutation {
+    addCategory(input: CategoryInput!): Category
+    updateCategory(id: ID!, input: CategoryInput!): Category
+    deleteCategory(id: ID!): Category
+    addProduct(input: ProductInput!): Product
+    updateProduct(id: ID!, input: ProductInput!): Product
+    deleteProduct(id: ID!): Product
+  }
 `);
+
 let categories = [
 	{ id: "1", name: "Electronics", parentId: null },
 	{ id: "2", name: "Laptops", parentId: "1" },
@@ -98,7 +123,33 @@ const root = {
 			return removed[0];
 		}
 	},
-	products: () => products,
+	products: ({ pagination = {} }) => {
+		const { page = 1, perPage = 2 } = pagination;
+		const startIndex = (page - 1) * perPage;
+		const endIndex = startIndex + perPage;
+		const paginatedProducts = products.slice(startIndex, endIndex);
+
+		return {
+			products: paginatedProducts,
+			pagination: {
+				totalItems: products.length,
+				totalPages: Math.ceil(products.length / perPage),
+				currentPage: page,
+				perPage: perPage,
+			},
+		};
+	},
+
+	product: ({ id }) => products.find((p) => p.id === id),
+
+	addProduct: ({ input }) => {
+		const newProduct = {
+			id: String(products.length + 1),
+			...input,
+		};
+		products.push(newProduct);
+		return newProduct;
+	},
 };
 
 const app = express();

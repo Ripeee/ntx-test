@@ -44,13 +44,21 @@ export const deleteCategoryMutation = gql`
 export const getProductsQuery = gql`
 	query GetProducts {
 		products {
-			id
-			name
-			price
-			description
-			categoryId
-			stock
-			image
+			products {
+				id
+				name
+				price
+				description
+				categoryId
+				stock
+				image
+			}
+			pagination {
+				totalItems
+				totalPages
+				currentPage
+				perPage
+			}
 		}
 	}
 `;

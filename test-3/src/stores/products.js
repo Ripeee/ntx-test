@@ -10,89 +10,57 @@ import { apolloClient } from "@/apollo";
 
 export const useProductStore = defineStore("products", {
 	state: () => ({
-		products: [
-			{
-				id: 1,
-				name: "Product 1",
-				price: 100,
-				description: "Description 1",
-				category: { id: 1, name: "Category 1" },
-				image: "image1.jpg",
-				stock: 10,
-			},
-		],
+		products: [],
 		loading: false,
 		error: null,
 		pagination: {
 			// Ensure this is properly initialized
 			currentPage: 1,
 			totalPages: 0,
-			perPage: 10, // Default value
+			perPage: 2,
 			totalItems: 0,
 		},
 	}),
 	actions: {
 		// READ - Fetch all products
-		// async fetchProducts(page = 1) {
-		// 	this.loading = true;
-		// 	this.error = null;
-
-		// 	try {
-		// 		const { data } = await apolloClient.query({
-		// 			query: getProductsQuery,
-		// 			variables: {
-		// 				page,
-		// 				perPage: this.pagination?.perPage || 10, // Fallback value
-		// 			},
-		// 		});
-
-		// 		console.log(data, "dataaaaa");
-		// 		this.products = data.products.data || [];
-		// 		// this.categories = Array.isArray(result.data.categories)
-		// 		// 	? result.data.categories
-		// 		// 	: [];
-
-		// 		// Update pagination only if response contains pagination data
-		// 		if (data.products.pagination) {
-		// 			this.pagination = {
-		// 				...this.pagination,
-		// 				...data.products.pagination,
-		// 			};
-		// 		}
-		// 	} catch (error) {
-		// 		this.error = error;
-		// 		console.error("Error fetching products:", error);
-		// 		this.products = [];
-		// 	} finally {
-		// 		this.loading = false;
-		// 	}
-		// },
-		async fetchProducts() {
+		async fetchProducts(page = 1) {
 			this.loading = true;
 			this.error = null;
 
 			try {
-				// if (!this.products.categoryId) {
-				// 	throw new Error("Category is required");
-				// }
-
-				const { data }= await apolloClient.query({
+				const { data } = await apolloClient.query({
 					query: getProductsQuery,
-					fetchPolicy: "no-cache", // Optional: always fetch fresh data
-				});
-				console.log(data, "dataaaaa");
+					variables: {
+						pagination: {
+							page,
+							perPage: this.pagination.perPage,
+						},
+					},
+				}); 
 
-				this.products = data.products || [];
-				// this.categories = Array.isArray(result.data.categories)
-				// 	? result.data.categories
-				// 	: [];
+				if (data?.products) {
+					this.products = data.products.products || [];
+
+					// Ensure pagination data is properly set
+					this.pagination = {
+							currentPage: page,
+							perPage: data.products.pagination?.perPage || this.pagination?.perPage || 2, // Default to 10 if not set
+							totalItems: data.products.pagination?.totalItems || 0,
+							totalPages: data.products.pagination?.totalPages || 0,
+					};
+			}
 			} catch (error) {
 				this.error = error;
 				console.error("Error fetching products:", error);
-				this.products = [];
+				this.products.products = [];
 			} finally {
 				this.loading = false;
 			}
+		},
+		// Add method to change items per page
+		async setItemsPerPage(perPage) {
+			this.pagination.perPage = perPage;
+			await this.fetchProducts(1); // Reset to first page
 		},
 
 		// CREATE - Add new product

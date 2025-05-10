@@ -36,6 +36,55 @@
       </div>
     </div>
 
+    <!-- Safely access pagination properties -->
+    <div class="pagination-controls">
+      <div class="pagination-info" v-if="pagination.totalItems > 0">
+        Showing {{ ((pagination.currentPage - 1) * pagination.perPage) + 1 }} 
+        to {{ Math.min(pagination.currentPage * pagination.perPage, pagination.totalItems) }} 
+        of {{ pagination.totalItems }} products
+      </div>
+      <div class="pagination-info" v-else>
+        No products found
+      </div>
+      
+      <div class="pagination-buttons">
+        <button 
+          @click="changePage(pagination.currentPage - 1)"
+          :disabled="pagination.currentPage === 1"
+        >
+          Previous
+        </button>
+        
+        <button
+          v-for="page in visiblePages"
+          :key="page"
+          @click="changePage(page)"
+          :class="{ active: page === pagination.currentPage }"
+        >
+          {{ page }}
+        </button>
+        
+        <button 
+          @click="changePage(pagination.currentPage + 1)"
+          :disabled="pagination.currentPage === pagination.totalPages"
+        >
+          Next
+        </button>
+      </div>
+      
+      <div class="per-page-selector">
+        <label>Items per page:</label>
+        <select 
+          v-model.number="pagination.perPage" 
+          @change="products.fetchProducts(1)"
+        >
+          <option value="2">2</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+    </div>
+
     <!-- Add/Edit Modal -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
@@ -100,8 +149,6 @@
                 id="stock" 
                 v-model.number="form.stock" 
                 type="number" 
-                step="0.01" 
-                min="0" 
                 required 
                 class="form-control"
               >
@@ -162,7 +209,7 @@ export default {
       image: null,
       imagePreview: null
     })
-    
+
     const fileInput = ref(null);
 
     const handleImageUpload = (event) => {
@@ -192,16 +239,16 @@ export default {
       }
     };
 
-    const resetForm = () => {
-      form.value = {
-        // ... reset other fields
-        image: null,
-        imagePreview: null
-      };
-      if (fileInput.value) {
-        fileInput.value.value = '';
-      }
-    };
+    // const resetForm = () => {
+    //   form.value = {
+    //     // ... reset other fields
+    //     image: null,
+    //     imagePreview: null
+    //   };
+    //   if (fileInput.value) {
+    //     fileInput.value.value = '';
+    //   }
+    // };
 
     const flatCategories = computed(() => {
       const flatten = (categories) => {
@@ -219,7 +266,7 @@ export default {
 
     const showAddForm = () => {
       editingProduct.value = null
-      form.value = { name: '', price: 0, categoryId: null }
+      form.value = { name: '', price: 0, categoryId: null, description: '', stock: 0, image: null, imagePreview: null }
       showModal.value = true
     }
 
@@ -251,6 +298,33 @@ export default {
       }
     }
 
+    const pagination = computed(() => productStore.pagination);
+
+    const visiblePages = computed(() => {
+      if (!pagination.value || pagination.value.totalPages <= 1) return [];
+      
+      const maxVisible = 5;
+      const current = pagination.value.currentPage;
+      const total = pagination.value.totalPages;
+      
+      let start = Math.max(1, current - Math.floor(maxVisible / 2));
+      let end = Math.min(total, start + maxVisible - 1);
+      
+      // Adjust if we're at the end
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+      
+      // Ensure we don't show negative or zero pages
+      return Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i);
+    });
+    const changePage = (page) => {
+      const newPage = Math.max(1, Math.min(page, pagination.value.totalPages));
+      if (newPage !== pagination.value.currentPage) {
+        productStore.fetchProducts(newPage);
+      }
+    };
+
     // Fetch data on component mount
     productStore.fetchProducts()
     categoryStore.fetchCategories()
@@ -271,7 +345,10 @@ export default {
       editProduct,
       closeModal,
       saveProduct,
-      confirmDeleteProduct
+      confirmDeleteProduct,
+      pagination,
+      visiblePages,
+      changePage,
     }
   }
 }
@@ -407,6 +484,42 @@ export default {
 .btn-delete {
   background: #f44336;
   color: white;
+}
+
+.pagination-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-buttons button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination-buttons button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.pagination-buttons button.active {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 </style>
